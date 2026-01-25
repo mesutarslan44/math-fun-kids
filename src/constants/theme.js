@@ -1,18 +1,19 @@
 const theme = {
     colors: {
-        primary: '#FFD93D', // Bright Yellow
+        primary: '#667eea', // Premium Mor
         secondary: '#FF6B6B', // Soft Red
-        accent: '#4D96FF', // Sky Blue
+        accent: '#764ba2', // Magenta
         success: '#6BCB77', // Green
-        background: '#FFF5E4', // Cream
+        background: '#F8F9FF', // Açık Mor-Beyaz
         text: '#2C3333', // Dark Gray
         white: '#FFFFFF',
         purple: '#9D4EDD',
         orange: '#FF9F1C',
-        gold: '#FFD700', // Added gold for stars
-        secondaryLight: '#FFE5E5', // Light version of secondary
+        gold: '#FFD700',
+        secondaryLight: '#FFE5E5',
         textLight: '#888888',
         green: '#6BCB77',
+        gradient: ['#667eea', '#764ba2'], // Premium Gradient
     },
     fonts: {
         bold: 'System', // Using System font for now, can be customized

@@ -289,15 +289,24 @@ const ShadowGameScreen = ({ navigation, route }) => {
             >
                 <Text style={styles.questionLabel}>Bu gölgenin sahibini bul!</Text>
 
-                {/* Shadow Display */}
+                {/* Shadow Display - Large dark area with silhouette */}
                 <View style={styles.shadowBox}>
-                    {question.type === 'emoji' ? (
-                        <View style={styles.shadowEmojiContainer}>
-                            <Text style={styles.shadowEmoji}>{question.target}</Text>
-                        </View>
-                    ) : (
-                        renderGridPattern(question.target, true, 100)
-                    )}
+                    <View style={styles.shadowArea}>
+                        {question.type === 'emoji' ? (
+                            <View style={[
+                                styles.shadowEmojiContainer,
+                                {
+                                    // Rastgele konum için offset
+                                    marginTop: Math.random() * 20 - 10,
+                                    marginLeft: Math.random() * 30 - 15,
+                                }
+                            ]}>
+                                <Text style={styles.shadowEmoji}>{question.target}</Text>
+                            </View>
+                        ) : (
+                            renderGridPattern(question.target, true, 100)
+                        )}
+                    </View>
                 </View>
 
                 {/* Hint */}
@@ -436,22 +445,37 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     shadowBox: {
-        backgroundColor: '#1a1a2e',
-        padding: 20,
-        borderRadius: 20,
+        backgroundColor: '#0a0a15',
+        padding: 10,
+        borderRadius: 24,
         marginBottom: 15,
+        minWidth: 200,
+        minHeight: 150,
+        alignItems: 'center',
+        justifyContent: 'center',
+        // Dış gölge efekti
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    shadowArea: {
+        width: 160,
+        height: 120,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0d0d1a',
+        borderRadius: 16,
     },
     shadowEmojiContainer: {
-        position: 'relative',
         alignItems: 'center',
         justifyContent: 'center',
     },
     shadowEmoji: {
-        fontSize: 80,
-        color: '#1a1a2e',
-        textShadowColor: '#0a0a15',
-        textShadowOffset: { width: 2, height: 2 },
-        textShadowRadius: 4,
+        fontSize: 70,
+        opacity: 0.15, // Gerçek silüet efekti - çok düşük opacity
+        color: '#ffffff',
     },
     gridContainer: {
         borderRadius: 8,
