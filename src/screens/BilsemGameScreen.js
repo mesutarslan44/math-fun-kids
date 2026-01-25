@@ -7,6 +7,7 @@ import theme from '../constants/theme';
 import { getBilsemLevelById } from '../data/bilsemQuestions';
 import { saveBilsemLevelProgress } from '../utils/BilsemManager';
 import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
+import { recordAnswer, recordSession } from '../utils/StatsManager';
 
 const BilsemGameScreen = ({ navigation, route }) => {
     const { levelId } = route.params;
@@ -36,6 +37,9 @@ const BilsemGameScreen = ({ navigation, route }) => {
             duration: 500,
             useNativeDriver: true,
         }).start();
+
+        // Record session when game starts
+        recordSession();
     }, [levelId]);
 
     const currentQuestion = level?.questions[currentQuestionIndex];
@@ -48,6 +52,9 @@ const BilsemGameScreen = ({ navigation, route }) => {
         setIsAnswered(true);
 
         const isCorrect = answer === currentQuestion.answer;
+
+        // Record answer for stats (use 'addition' as mode for BİLSEM)
+        await recordAnswer('addition', isCorrect);
 
         if (isCorrect) {
             setScore(s => s + 1);

@@ -7,6 +7,7 @@ import theme from '../constants/theme';
 import { getSymmetryLevelById, generateSymmetryQuestion } from '../data/symmetryGameData';
 import { saveSymmetryLevelProgress } from '../utils/SymmetryManager';
 import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
+import { recordAnswer, recordSession } from '../utils/StatsManager';
 
 const { width } = Dimensions.get('window');
 
@@ -42,6 +43,8 @@ const SymmetryGameScreen = ({ navigation, route }) => {
             setShowConfetti(false);
             loadNewQuestion(levelData);
         }
+        // Record session when game starts
+        recordSession();
     };
 
     const loadNewQuestion = (lvl) => {
@@ -79,7 +82,7 @@ const SymmetryGameScreen = ({ navigation, route }) => {
         }
     };
 
-    const handleOptionSelect = (index) => {
+    const handleOptionSelect = async (index) => {
         if (isAnswered) return;
 
         if (timerRef.current) clearInterval(timerRef.current);
@@ -89,6 +92,9 @@ const SymmetryGameScreen = ({ navigation, route }) => {
         setIsAnswered(true);
 
         const isCorrect = index === question.correctIndex;
+
+        // Record answer for stats
+        await recordAnswer('multiplication', isCorrect);
 
         if (isCorrect) {
             setScore(s => s + 1);

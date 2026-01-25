@@ -8,7 +8,7 @@ import theme from '../constants/theme';
 import { generateQuestion } from '../utils/gameLogic';
 import { getDifficulty } from '../utils/DifficultyManager';
 import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
-import { recordAnswer } from '../utils/StatsManager';
+import { recordAnswer, recordSession } from '../utils/StatsManager';
 import { addToLeaderboard } from '../utils/LeaderboardManager';
 
 const TimeRaceScreen = ({ navigation }) => {
@@ -27,6 +27,7 @@ const TimeRaceScreen = ({ navigation }) => {
 
     useEffect(() => {
         loadDifficulty();
+        // Record session when game starts (will be called when startGame is called)
         return () => clearInterval(timerRef.current);
     }, []);
 
@@ -47,6 +48,8 @@ const TimeRaceScreen = ({ navigation }) => {
 
     const startGame = () => {
         setGameState('playing');
+        // Record session when game starts
+        recordSession();
         setScore(0);
         setTimeLeft(60);
         loadNewQuestion();

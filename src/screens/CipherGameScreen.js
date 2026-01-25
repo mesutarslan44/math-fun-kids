@@ -7,6 +7,7 @@ import theme from '../constants/theme';
 import { getCipherLevelById } from '../data/cipherGameData';
 import { saveCipherLevelProgress } from '../utils/CipherManager';
 import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
+import { recordAnswer, recordSession } from '../utils/StatsManager';
 
 const CipherGameScreen = ({ navigation, route }) => {
     const { levelId } = route.params;
@@ -41,16 +42,21 @@ const CipherGameScreen = ({ navigation, route }) => {
             setGameState('playing');
             setShowConfetti(false);
         }
+        // Record session when game starts
+        recordSession();
     };
 
     const currentQuestion = questions[currentIndex];
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!answer.trim() || isAnswered) return;
 
         Keyboard.dismiss();
         const userAnswer = parseInt(answer.trim());
         const correct = userAnswer === currentQuestion.answer;
+
+        // Record answer for stats
+        await recordAnswer('division', correct);
 
         setIsAnswered(true);
         setIsCorrect(correct);

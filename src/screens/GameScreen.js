@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Layout from '../components/Layout';
 import Button from '../components/Button';
 import Mascot from '../components/Mascot';
 import Confetti from '../components/Confetti';
+import SkeletonLoader, { SkeletonCard, SkeletonButton } from '../components/SkeletonLoader';
 import theme from '../constants/theme';
 import { generateQuestion } from '../utils/gameLogic';
 import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
@@ -41,6 +43,11 @@ const GameScreen = ({ navigation, route }) => {
     const [earnedStars, setEarnedStars] = useState(0);
     const [character, setCharacter] = useState('robot');
     const [unlockedCharacters, setUnlockedCharacters] = useState(['robot']);
+    const [feedbackMessage, setFeedbackMessage] = useState('Harika! 🎉');
+    const [newAchievement, setNewAchievement] = useState(null);
+    const [showAchievementModal, setShowAchievementModal] = useState(false);
+    const achievementScale = useRef(new Animated.Value(0)).current;
+    const achievementRotation = useRef(new Animated.Value(0)).current;
 
     // Animation values
     const feedbackScale = useRef(new Animated.Value(0)).current;
@@ -50,6 +57,8 @@ const GameScreen = ({ navigation, route }) => {
     useEffect(() => {
         loadProgress();
         loadNewQuestion();
+        // Record session when game starts
+        recordSession();
     }, []);
 
     const loadProgress = async () => {
@@ -131,6 +140,38 @@ const GameScreen = ({ navigation, route }) => {
         const stats = await getStats();
         const newAchievements = await checkAndUnlockAchievements(stats);
 
+        // Show achievement animation if new achievement unlocked
+        if (newAchievements && newAchievements.length > 0) {
+            setNewAchievement(newAchievements[0]);
+            setShowAchievementModal(true);
+            // Animate achievement modal
+            Animated.parallel([
+                Animated.spring(achievementScale, {
+                    toValue: 1,
+                    friction: 3,
+                    tension: 40,
+                    useNativeDriver: true,
+                }),
+                Animated.sequence([
+                    Animated.timing(achievementRotation, {
+                        toValue: 1,
+                        duration: 500,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(achievementRotation, {
+                        toValue: 0,
+                        duration: 500,
+                        useNativeDriver: true,
+                    }),
+                ]),
+            ]).start();
+            // Auto close after 3 seconds
+            setTimeout(() => {
+                setShowAchievementModal(false);
+                achievementScale.setValue(0);
+            }, 3000);
+        }
+
         if (isCorrect) {
             // Correct!
             setScore(s => s + 10);
@@ -165,8 +206,25 @@ const GameScreen = ({ navigation, route }) => {
         await AsyncStorage.setItem('selectedCharacter', nextChar);
     };
 
+    // Doğru cevap mesajları varyasyonu
+    const getSuccessMessage = () => {
+        const messages = [
+            'Harika! 🎉',
+            'Mükemmel! ⭐',
+            'Süpersin! 🚀',
+            'Bravo! 👏',
+            'Harika iş! 💪',
+            'Çok iyi! 🌟',
+            'Muhteşem! 🎯',
+            'Tebrikler! 🏆',
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+    };
+
     const showFeedback = (isCorrect) => {
         if (isCorrect) {
+            const message = getSuccessMessage();
+            setFeedbackMessage(message);
             Animated.parallel([
                 Animated.spring(feedbackScale, {
                     toValue: 1,
@@ -190,11 +248,56 @@ const GameScreen = ({ navigation, route }) => {
         ]).start();
     };
 
-    if (!currentQuestion) return <Layout><Text>Loading...</Text></Layout>;
+    if (!currentQuestion) {
+        return (
+            <Layout>
+                <View style={styles.loadingContainer}>
+                    <SkeletonCard />
+                    <View style={styles.loadingContent}>
+                        <SkeletonLoader width="80%" height={60} borderRadius={8} style={{ marginBottom: 20 }} />
+                        <SkeletonButton />
+                        <SkeletonButton />
+                    </View>
+                </View>
+            </Layout>
+        );
+    }
 
     return (
         <Layout>
             {showConfetti && <Confetti />}
+
+            {/* Achievement Unlock Modal */}
+            {showAchievementModal && newAchievement && (
+                <View style={styles.achievementModalOverlay}>
+                    <Animated.View
+                        style={[
+                            styles.achievementModal,
+                            {
+                                transform: [
+                                    { scale: achievementScale },
+                                    {
+                                        rotate: achievementRotation.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: ['0deg', '360deg'],
+                                        }),
+                                    },
+                                ],
+                            },
+                        ]}
+                    >
+                        <View style={styles.achievementIconContainer}>
+                            <Text style={styles.achievementIcon}>{newAchievement.icon}</Text>
+                            <View style={styles.achievementSparkles}>
+                                <Text style={styles.sparkle}>✨</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.achievementTitle}>Yeni Başarım!</Text>
+                        <Text style={styles.achievementName}>{newAchievement.title}</Text>
+                        <Text style={styles.achievementDesc}>{newAchievement.description}</Text>
+                    </Animated.View>
+                </View>
+            )}
 
             <View style={styles.header}>
                 <Button
@@ -223,6 +326,32 @@ const GameScreen = ({ navigation, route }) => {
                 </View>
             </View>
 
+            {/* Progress Bar - Seviye modunda göster */}
+            {levelId && (
+                <View style={styles.progressBarContainer}>
+                    <View style={styles.progressBarBackground}>
+                        <Animated.View
+                            style={[
+                                styles.progressBarFill,
+                                {
+                                    width: `${(questionsAnswered / 10) * 100}%`,
+                                },
+                            ]}
+                        >
+                            <LinearGradient
+                                colors={[theme.colors.success, theme.colors.secondary]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={StyleSheet.absoluteFill}
+                            />
+                        </Animated.View>
+                    </View>
+                    <Text style={styles.progressText}>
+                        {questionsAnswered}/10 Soru
+                    </Text>
+                </View>
+            )}
+
             <View style={styles.gameArea}>
                 {/* Mascot Peeking - Tap to change */}
                 <TouchableOpacity onPress={changeCharacter} activeOpacity={0.8} style={styles.mascotContainer}>
@@ -247,7 +376,7 @@ const GameScreen = ({ navigation, route }) => {
 
                 {/* Feedback Overlay */}
                 <Animated.View style={[styles.feedbackContainer, { transform: [{ scale: feedbackScale }], opacity: feedbackOpacity }]}>
-                    <Text style={styles.feedbackText}>Harika! 🎉</Text>
+                    <Text style={styles.feedbackText}>{feedbackMessage}</Text>
                 </Animated.View>
 
                 <View style={styles.optionsContainer}>
@@ -465,6 +594,91 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
+    },
+    progressBarContainer: {
+        paddingHorizontal: theme.spacing.l,
+        paddingVertical: theme.spacing.s,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        marginHorizontal: theme.spacing.m,
+        borderRadius: theme.borderRadius.m,
+        marginBottom: theme.spacing.s,
+    },
+    progressBarBackground: {
+        height: 8,
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        borderRadius: 4,
+        overflow: 'hidden',
+        marginBottom: 4,
+    },
+    progressBarFill: {
+        height: '100%',
+        borderRadius: 4,
+    },
+    progressText: {
+        fontSize: 12,
+        color: theme.colors.textLight,
+        textAlign: 'center',
+        fontWeight: '600',
+    },
+    achievementModalOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 200,
+    },
+    achievementModal: {
+        backgroundColor: theme.colors.white,
+        borderRadius: 30,
+        padding: theme.spacing.xl,
+        alignItems: 'center',
+        width: '85%',
+        elevation: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+    },
+    achievementIconContainer: {
+        position: 'relative',
+        marginBottom: theme.spacing.m,
+    },
+    achievementIcon: {
+        fontSize: 80,
+    },
+    achievementSparkles: {
+        position: 'absolute',
+        top: -10,
+        right: -10,
+    },
+    sparkle: {
+        fontSize: 30,
+    },
+    achievementTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: theme.colors.gold,
+        marginBottom: theme.spacing.s,
+    },
+    achievementName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+        marginBottom: theme.spacing.s,
+        textAlign: 'center',
+    },
+    achievementDesc: {
+        fontSize: 14,
+        color: theme.colors.textLight,
+        textAlign: 'center',
+    },
+    loadingContainer: {
+        flex: 1,
+        padding: theme.spacing.l,
+    },
+    loadingContent: {
+        marginTop: theme.spacing.xl,
+        gap: theme.spacing.m,
     },
 });
 

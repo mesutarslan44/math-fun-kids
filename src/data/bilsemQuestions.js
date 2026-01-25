@@ -165,7 +165,7 @@ export const BILSEM_LEVELS = [
                 type: 'logic',
                 question: 'Bütün elmalar meyvedir. Bu bir elmadır. O zaman bu bir... ?',
                 hint: 'Elmalar meyve ise, bu elma da...',
-                options: ['Sebzedir', 'Meyvedir', 'Hayvandir', 'Bilinmez'],
+                options: ['Sebzedir', 'Meyvedir', 'Hayvandır', 'Bilinmez'],
                 answer: 'Meyvedir',
             },
         ],
@@ -747,7 +747,7 @@ export const BILSEM_LEVELS = [
             {
                 type: 'pattern',
                 question: '🔺 → ⬡ → ⬢ → ? (Kenar sayısı artıyor)',
-                hint: '3→6→6→? (düzgün çokgenler)',
+                hint: '3→6→6→? (üçgen, altıgen, altıgen, sonraki? - dikkat: altıgen tekrar etti)',
                 options: ['⬡', '⭘', '◯', '⬣'],
                 answer: '⭘',
             },

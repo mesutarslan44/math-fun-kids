@@ -7,6 +7,7 @@ import theme from '../constants/theme';
 import { getShadowLevelById, generateShadowQuestion } from '../data/shadowGameData';
 import { saveShadowLevelProgress } from '../utils/ShadowManager';
 import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
+import { recordAnswer, recordSession } from '../utils/StatsManager';
 
 const { width } = Dimensions.get('window');
 
@@ -43,6 +44,8 @@ const ShadowGameScreen = ({ navigation, route }) => {
             setShowConfetti(false);
             loadNewQuestion(levelData);
         }
+        // Record session when game starts
+        recordSession();
     };
 
     const loadNewQuestion = (lvl) => {
@@ -81,7 +84,7 @@ const ShadowGameScreen = ({ navigation, route }) => {
         }
     };
 
-    const handleOptionSelect = (index) => {
+    const handleOptionSelect = async (index) => {
         if (isAnswered) return;
 
         if (timerRef.current) clearInterval(timerRef.current);
@@ -91,6 +94,9 @@ const ShadowGameScreen = ({ navigation, route }) => {
         setIsAnswered(true);
 
         const isCorrect = index === question.correctIndex;
+
+        // Record answer for stats
+        await recordAnswer('subtraction', isCorrect);
 
         if (isCorrect) {
             setScore(s => s + 1);

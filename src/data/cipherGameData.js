@@ -245,7 +245,7 @@ export const CIPHER_LEVELS = [
                 cipher: { '●': '?', '■': '?' },
                 equation: '●=100, ■=50, ▲=25, ◆=?',
                 answer: 12,
-                hint: '÷2 örüntüsü (12.5≈12)',
+                hint: '÷2 örüntüsü (25÷2=12.5, aşağı yuvarlanmış: 12)',
             },
         ],
     },

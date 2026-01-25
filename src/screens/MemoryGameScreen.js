@@ -7,6 +7,7 @@ import theme from '../constants/theme';
 import { getMemoryLevelById, generateCards } from '../data/memoryGameData';
 import { saveMemoryLevelProgress } from '../utils/MemoryManager';
 import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
+import { recordAnswer, recordSession } from '../utils/StatsManager';
 
 const { width } = Dimensions.get('window');
 
@@ -27,6 +28,8 @@ const MemoryGameScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         initGame();
+        // Record session when game starts
+        recordSession();
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
@@ -98,6 +101,8 @@ const MemoryGameScreen = ({ navigation, route }) => {
             if (newFlipped[0].pairId === newFlipped[1].pairId) {
                 // Match!
                 playSuccess();
+                // Record correct answer for stats
+                recordAnswer('addition', true);
                 const newMatched = [...matchedPairs, card.pairId];
                 setMatchedPairs(newMatched);
                 setFlippedCards([]);
@@ -109,6 +114,8 @@ const MemoryGameScreen = ({ navigation, route }) => {
             } else {
                 // No match
                 playFailure();
+                // Record wrong answer for stats
+                recordAnswer('addition', false);
                 setTimeout(() => {
                     setFlippedCards([]);
                 }, 800);
