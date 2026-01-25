@@ -294,7 +294,6 @@ const ShadowGameScreen = ({ navigation, route }) => {
                     {question.type === 'emoji' ? (
                         <View style={styles.shadowEmojiContainer}>
                             <Text style={styles.shadowEmoji}>{question.target}</Text>
-                            <View style={styles.shadowOverlay} />
                         </View>
                     ) : (
                         renderGridPattern(question.target, true, 100)
@@ -444,19 +443,15 @@ const styles = StyleSheet.create({
     },
     shadowEmojiContainer: {
         position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     shadowEmoji: {
         fontSize: 80,
-        opacity: 0,
-    },
-    shadowOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: '#000',
-        borderRadius: 10,
+        color: '#1a1a2e',
+        textShadowColor: '#0a0a15',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
     },
     gridContainer: {
         borderRadius: 8,

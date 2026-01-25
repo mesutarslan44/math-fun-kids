@@ -6,8 +6,8 @@ let soundObject = null;
 let isMusicEnabled = true;
 let isSoundEnabled = true;
 
-// Background music URL (cheerful kids music)
-const MUSIC_URL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Example placeholder
+// Yerel arka plan müziği
+const BACKGROUND_MUSIC = require('../../assets/derscalismaodaklanma.mp3');
 
 export const initAudio = async () => {
     try {
@@ -39,13 +39,13 @@ export const playBackgroundMusic = async () => {
         }
 
         const { sound } = await Audio.Sound.createAsync(
-            { uri: MUSIC_URL },
+            BACKGROUND_MUSIC,
             { isLooping: true, volume: 0.3 }
         );
         soundObject = sound;
         await sound.playAsync();
     } catch (e) {
-        // failed to play music
+        console.warn('Music playback failed', e);
     }
 };
 

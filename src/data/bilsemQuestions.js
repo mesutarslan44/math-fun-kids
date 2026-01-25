@@ -52,7 +52,7 @@ export const BILSEM_LEVELS = [
                 question: '🍎 🍎 🍊 🍎 🍎 🍊 🍎 🍎 ?',
                 hint: 'İki elmadan sonra ne geliyor?',
                 options: ['🍎', '🍊', '🍋', '🍇'],
-                answer: '��',
+                answer: '🍊',
             },
             {
                 type: 'logic',
