@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Logger from './Logger';
 
 const LEADERBOARD_KEY = '@math_fun_kids_leaderboard';
 
@@ -30,7 +31,7 @@ export const addToLeaderboard = async (name, score, mode = 'time_race') => {
         await AsyncStorage.setItem(LEADERBOARD_KEY, JSON.stringify(top10));
         return top10;
     } catch (e) {
-        console.error('Failed to add to leaderboard', e);
+        Logger.error('Failed to add to leaderboard', e);
         return [];
     }
 };
@@ -39,6 +40,6 @@ export const clearLeaderboard = async () => {
     try {
         await AsyncStorage.removeItem(LEADERBOARD_KEY);
     } catch (e) {
-        console.error('Failed to clear leaderboard', e);
+        Logger.error('Failed to clear leaderboard', e);
     }
 };

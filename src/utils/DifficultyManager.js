@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Logger from './Logger';
 
 const DIFFICULTY_KEY = '@math_fun_kids_difficulty';
 
@@ -44,6 +45,6 @@ export const setDifficulty = async (level) => {
     try {
         await AsyncStorage.setItem(DIFFICULTY_KEY, level);
     } catch (e) {
-        console.error('Failed to set difficulty', e);
+        Logger.error('Failed to set difficulty', e);
     }
 };

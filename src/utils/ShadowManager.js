@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOW_LEVELS } from '../data/shadowGameData';
+import Logger from './Logger';
 
 const SHADOW_PROGRESS_KEY = '@math_fun_kids_shadow_progress';
 
@@ -8,7 +9,7 @@ export const getShadowProgress = async () => {
         const stored = await AsyncStorage.getItem(SHADOW_PROGRESS_KEY);
         return stored ? JSON.parse(stored) : {};
     } catch (e) {
-        console.error('Failed to get Shadow progress', e);
+        Logger.error('Failed to get Shadow progress', e);
         return {};
     }
 };
@@ -44,7 +45,7 @@ export const saveShadowLevelProgress = async (levelId, score, total) => {
             passed: percentage >= 70,
         };
     } catch (e) {
-        console.error('Failed to save Shadow progress', e);
+        Logger.error('Failed to save Shadow progress', e);
         return { success: false };
     }
 };

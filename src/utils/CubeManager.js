@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CUBE_LEVELS } from '../data/cubeGameData';
+import Logger from './Logger';
 
 const CUBE_PROGRESS_KEY = '@math_fun_kids_cube_progress';
 
@@ -11,7 +12,7 @@ export const getCubeProgress = async () => {
         const stored = await AsyncStorage.getItem(CUBE_PROGRESS_KEY);
         return stored ? JSON.parse(stored) : {};
     } catch (e) {
-        console.error('Failed to get Cube progress', e);
+        Logger.error('Failed to get Cube progress', e);
         return {};
     }
 };
@@ -50,7 +51,7 @@ export const saveCubeLevelProgress = async (levelId, score, total) => {
             passed: percentage >= 70,
         };
     } catch (e) {
-        console.error('Failed to save Cube progress', e);
+        Logger.error('Failed to save Cube progress', e);
         return { success: false };
     }
 };

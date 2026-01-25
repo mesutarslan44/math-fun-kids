@@ -1,6 +1,7 @@
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Logger from './Logger';
 
 let soundObject = null;
 let isMusicEnabled = true;
@@ -26,7 +27,7 @@ export const initAudio = async () => {
             playBackgroundMusic();
         }
     } catch (e) {
-        console.warn('Audio init failed', e);
+        Logger.warn('Audio init failed', e);
     }
 };
 
@@ -45,7 +46,7 @@ export const playBackgroundMusic = async () => {
         soundObject = sound;
         await sound.playAsync();
     } catch (e) {
-        console.warn('Music playback failed', e);
+        Logger.warn('Music playback failed', e);
     }
 };
 

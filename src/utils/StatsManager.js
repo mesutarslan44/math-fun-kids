@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Logger from './Logger';
 
 const STATS_KEY = '@math_fun_kids_stats';
 
@@ -43,7 +44,7 @@ export const recordAnswer = async (mode, isCorrect) => {
 
         await AsyncStorage.setItem(STATS_KEY, JSON.stringify(stats));
     } catch (e) {
-        console.error('Failed to record answer', e);
+        Logger.error('Failed to record answer', e);
     }
 };
 
@@ -73,7 +74,7 @@ export const recordSession = async () => {
 
         await AsyncStorage.setItem(STATS_KEY, JSON.stringify(stats));
     } catch (e) {
-        console.error('Failed to record session', e);
+        Logger.error('Failed to record session', e);
     }
 };
 

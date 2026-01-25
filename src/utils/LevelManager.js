@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Logger from './Logger';
 
 const LEVELS_KEY = '@math_fun_kids_levels';
 
@@ -51,7 +52,7 @@ export const getLevels = async () => {
             locked: level.id === 1 ? false : (userProgress[level.id - 1] || 0) < (level.requiredStars || 1),
         }));
     } catch (e) {
-        console.error('Failed to load levels', e);
+        Logger.error('Failed to load levels', e);
         return LEVEL_CONFIG;
     }
 };
@@ -69,7 +70,7 @@ export const saveLevelProgress = async (levelId, stars) => {
         }
         return false;
     } catch (e) {
-        console.error('Failed to save progress', e);
+        Logger.error('Failed to save progress', e);
         return false;
     }
 };

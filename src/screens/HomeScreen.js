@@ -9,6 +9,7 @@ import Confetti from '../components/Confetti';
 import theme from '../constants/theme';
 import { checkDailyReward, claimDailyReward } from '../utils/DailyRewardManager';
 import { playSuccess, playSelection } from '../utils/SoundManager';
+import Logger from '../utils/Logger';
 
 const CHARACTERS = ['robot', 'cat', 'dino', 'fox', 'bunny', 'bear', 'lion', 'owl', 'panda', 'unicorn'];
 const CHARACTER_NAMES = {
@@ -91,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
                 setCharacter(savedChar);
             }
         } catch (e) {
-            console.error('Failed to load character', e);
+            Logger.error('Failed to load character', e);
         }
     };
 
@@ -113,25 +114,25 @@ const HomeScreen = ({ navigation }) => {
         }
     };
 
-    const changeCharacter = async () => {
+    const changeCharacter = useCallback(async () => {
         playSelection();
         const currentIndex = unlockedCharacters.indexOf(character);
         const nextIndex = (currentIndex + 1) % unlockedCharacters.length;
         const nextChar = unlockedCharacters[nextIndex];
         setCharacter(nextChar);
         await AsyncStorage.setItem('selectedCharacter', nextChar);
-    };
+    }, [character, unlockedCharacters]);
 
-    const handleModeSelect = (mode) => {
+    const handleModeSelect = useCallback((mode) => {
         playSelection();
         setSelectedMode(mode);
-    };
+    }, []);
 
-    const handleDifficultySelect = async (difficulty) => {
+    const handleDifficultySelect = useCallback(async (difficulty) => {
         playSelection();
         navigation.navigate('Game', { mode: selectedMode, difficulty: difficulty });
         setSelectedMode(null);
-    };
+    }, [selectedMode, navigation]);
 
     return (
         <Layout style={styles.container}>

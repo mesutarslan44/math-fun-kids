@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, memo } from 'react';
 import { TouchableOpacity, Text, StyleSheet, Animated, View } from 'react-native';
 import theme from '../constants/theme';
 
-const Button = ({ onPress, title, color = theme.colors.primary, textColor = theme.colors.text, style }) => {
+const Button = memo(({ onPress, title, color = theme.colors.primary, textColor = theme.colors.text, style, accessibilityLabel, accessibilityHint }) => {
     const scale = useRef(new Animated.Value(1)).current;
     const translateY = useRef(new Animated.Value(0)).current;
 
@@ -35,12 +35,17 @@ const Button = ({ onPress, title, color = theme.colors.primary, textColor = them
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 style={[styles.container, { backgroundColor: color }]}
+                accessibilityRole="button"
+                accessibilityLabel={accessibilityLabel || title}
+                accessibilityHint={accessibilityHint}
             >
                 <Text style={[styles.text, { color: textColor }]}>{title}</Text>
             </TouchableOpacity>
         </Animated.View>
     );
-};
+});
+
+Button.displayName = 'Button';
 
 const styles = StyleSheet.create({
     wrapper: {

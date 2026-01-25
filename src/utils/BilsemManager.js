@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BILSEM_LEVELS } from '../data/bilsemQuestions';
+import Logger from './Logger';
 
 const BILSEM_PROGRESS_KEY = '@math_fun_kids_bilsem_progress';
 
@@ -12,7 +13,7 @@ export const getBilsemProgress = async () => {
         const stored = await AsyncStorage.getItem(BILSEM_PROGRESS_KEY);
         return stored ? JSON.parse(stored) : {};
     } catch (e) {
-        console.error('Failed to get BİLSEM progress', e);
+        Logger.error('Failed to get BİLSEM progress', e);
         return {};
     }
 };
@@ -54,7 +55,7 @@ export const saveBilsemLevelProgress = async (levelId, score, totalQuestions = 1
             isNewHighScore: percentage > (progress[levelId]?.highScore || 0),
         };
     } catch (e) {
-        console.error('Failed to save BİLSEM progress', e);
+        Logger.error('Failed to save BİLSEM progress', e);
         return { success: false };
     }
 };
@@ -108,7 +109,7 @@ export const resetBilsemProgress = async () => {
         await AsyncStorage.removeItem(BILSEM_PROGRESS_KEY);
         return true;
     } catch (e) {
-        console.error('Failed to reset BİLSEM progress', e);
+        Logger.error('Failed to reset BİLSEM progress', e);
         return false;
     }
 };

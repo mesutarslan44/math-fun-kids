@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CIPHER_LEVELS } from '../data/cipherGameData';
+import Logger from './Logger';
 
 const CIPHER_PROGRESS_KEY = '@math_fun_kids_cipher_progress';
 
@@ -8,7 +9,7 @@ export const getCipherProgress = async () => {
         const stored = await AsyncStorage.getItem(CIPHER_PROGRESS_KEY);
         return stored ? JSON.parse(stored) : {};
     } catch (e) {
-        console.error('Failed to get Cipher progress', e);
+        Logger.error('Failed to get Cipher progress', e);
         return {};
     }
 };
@@ -44,7 +45,7 @@ export const saveCipherLevelProgress = async (levelId, score, total) => {
             passed: percentage >= 70,
         };
     } catch (e) {
-        console.error('Failed to save Cipher progress', e);
+        Logger.error('Failed to save Cipher progress', e);
         return { success: false };
     }
 };

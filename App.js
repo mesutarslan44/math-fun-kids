@@ -26,6 +26,8 @@ import ShadowLevelScreen from './src/screens/ShadowLevelScreen';
 import ShadowGameScreen from './src/screens/ShadowGameScreen';
 import ParentInfoScreen from './src/screens/ParentInfoScreen';
 import { initAudio } from './src/utils/SoundManager';
+import { initErrorReporting } from './src/utils/ErrorReporting';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,23 +35,31 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    // Initialize error reporting first
+    initErrorReporting();
+    // Then initialize audio
     initAudio();
   }, []);
 
   if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+    return (
+      <ErrorBoundary>
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      </ErrorBoundary>
+    );
   }
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Home"
-          screenOptions={{
-            headerShown: false,
-            animation: 'slide_from_right',
-          }}
-        >
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Home"
+            screenOptions={{
+              headerShown: false,
+              animation: 'slide_from_right',
+            }}
+          >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="LevelSelect" component={LevelSelectScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -72,8 +82,9 @@ export default function App() {
           <Stack.Screen name="ShadowGame" component={ShadowGameScreen} />
           <Stack.Screen name="ParentInfo" component={ParentInfoScreen} />
           <Stack.Screen name="Game" component={GameScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

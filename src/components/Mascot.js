@@ -231,27 +231,6 @@ const Mascot = ({ emotion = 'happy', type = 'robot', style }) => {
         </Svg>
     );
 
-    // 🐸 Kurbağa - Frog
-    const renderFrog = () => (
-        <Svg height="150" width="150" viewBox="0 0 100 100">
-            <Circle cx="35" cy="35" r="12" fill="#4CAF50" />
-            <Circle cx="35" cy="32" r="6" fill="white" />
-            <Circle cx="35" cy="32" r="3" fill="black" />
-            <Circle cx="65" cy="35" r="12" fill="#4CAF50" />
-            <Circle cx="65" cy="32" r="6" fill="white" />
-            <Circle cx="65" cy="32" r="3" fill="black" />
-            <Ellipse cx="50" cy="60" rx="30" ry="22" fill="#4CAF50" />
-            <Ellipse cx="50" cy="65" rx="20" ry="12" fill="#81C784" />
-            <Circle cx="40" cy="55" r="4" fill="#E8F5E9" opacity="0.6" />
-            <Circle cx="60" cy="55" r="4" fill="#E8F5E9" opacity="0.6" />
-            {emotion === 'happy' ? (
-                <Path d="M35 70 Q50 80 65 70" stroke="#2C3333" strokeWidth="3" fill="none" />
-            ) : (
-                <Path d="M40 75 Q50 70 60 75" stroke="#2C3333" strokeWidth="2" fill="none" />
-            )}
-        </Svg>
-    );
-
     const renderMascot = () => {
         switch (type) {
             case 'robot': return renderRobot();
@@ -264,7 +243,6 @@ const Mascot = ({ emotion = 'happy', type = 'robot', style }) => {
             case 'owl': return renderOwl();
             case 'panda': return renderPanda();
             case 'unicorn': return renderUnicorn();
-            case 'frog': return renderFrog();
             default: return renderRobot();
         }
     };

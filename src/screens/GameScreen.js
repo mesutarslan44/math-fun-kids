@@ -11,6 +11,7 @@ import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
 import { saveLevelProgress } from '../utils/LevelManager';
 import { recordAnswer, recordSession, getStats } from '../utils/StatsManager';
 import { checkAndUnlockAchievements } from '../utils/AchievementManager';
+import Logger from '../utils/Logger';
 import { Star, Lock, Home, RotateCcw } from 'lucide-react-native';
 
 const CHARACTERS = ['robot', 'cat', 'dino', 'fox', 'bunny', 'bear', 'lion', 'owl', 'panda', 'unicorn'];
@@ -65,7 +66,7 @@ const GameScreen = ({ navigation, route }) => {
                 setCharacter(savedChar);
             }
         } catch (e) {
-            console.error('Failed to load progress', e);
+            Logger.error('Failed to load progress', e);
         }
     };
 
@@ -83,7 +84,7 @@ const GameScreen = ({ navigation, route }) => {
                 playSuccess();
             }
         } catch (e) {
-            console.error('Failed to save progress', e);
+            Logger.error('Failed to save progress', e);
         }
     };
 

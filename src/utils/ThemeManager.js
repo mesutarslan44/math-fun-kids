@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Logger from './Logger';
 
 const THEME_KEY = '@math_fun_kids_theme';
 
@@ -67,7 +68,7 @@ export const setCurrentTheme = async (themeId) => {
     try {
         await AsyncStorage.setItem(THEME_KEY, themeId);
     } catch (e) {
-        console.error('Failed to set theme', e);
+        Logger.error('Failed to set theme', e);
     }
 };
 

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SYMMETRY_LEVELS } from '../data/symmetryGameData';
+import Logger from './Logger';
 
 const SYMMETRY_PROGRESS_KEY = '@math_fun_kids_symmetry_progress';
 
@@ -8,7 +9,7 @@ export const getSymmetryProgress = async () => {
         const stored = await AsyncStorage.getItem(SYMMETRY_PROGRESS_KEY);
         return stored ? JSON.parse(stored) : {};
     } catch (e) {
-        console.error('Failed to get Symmetry progress', e);
+        Logger.error('Failed to get Symmetry progress', e);
         return {};
     }
 };
@@ -44,7 +45,7 @@ export const saveSymmetryLevelProgress = async (levelId, score, total) => {
             passed: percentage >= 70,
         };
     } catch (e) {
-        console.error('Failed to save Symmetry progress', e);
+        Logger.error('Failed to save Symmetry progress', e);
         return { success: false };
     }
 };

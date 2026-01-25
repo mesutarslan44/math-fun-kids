@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView } from 're
 import Layout from '../components/Layout';
 import theme from '../constants/theme';
 import { getAudioSettings, setMusicEnabled, setSoundEnabled, playSelection } from '../utils/SoundManager';
+import { getAppVersion } from '../utils/AppVersion';
 import { Music, Volume2, Info, BarChart2 } from 'lucide-react-native';
 
 const SettingsScreen = ({ navigation }) => {
@@ -80,8 +81,8 @@ const SettingsScreen = ({ navigation }) => {
 
                 <View style={styles.aboutSection}>
                     <Info color={theme.colors.textLight} size={20} style={{ marginBottom: 8 }} />
-                    <Text style={styles.aboutTitle}>Matematik Eğlencesi</Text>
-                    <Text style={styles.aboutText}>Versiyon 1.2.0</Text>
+                    <Text style={styles.aboutTitle}>Bilsem ve Eğlenceli Matematik</Text>
+                    <Text style={styles.aboutText}>Versiyon {getAppVersion()}</Text>
                     <Text style={styles.aboutText}>Çocuklar için sevgiyle yapıldı ❤️</Text>
                 </View>
             </ScrollView>

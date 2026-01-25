@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MEMORY_LEVELS } from '../data/memoryGameData';
+import Logger from './Logger';
 
 const MEMORY_PROGRESS_KEY = '@math_fun_kids_memory_progress';
 
@@ -11,7 +12,7 @@ export const getMemoryProgress = async () => {
         const stored = await AsyncStorage.getItem(MEMORY_PROGRESS_KEY);
         return stored ? JSON.parse(stored) : {};
     } catch (e) {
-        console.error('Failed to get Memory progress', e);
+        Logger.error('Failed to get Memory progress', e);
         return {};
     }
 };
@@ -50,7 +51,7 @@ export const saveMemoryLevelProgress = async (levelId, moves, timeMs) => {
             isNewBest: moves <= progress[levelId].bestMoves,
         };
     } catch (e) {
-        console.error('Failed to save Memory progress', e);
+        Logger.error('Failed to save Memory progress', e);
         return { success: false };
     }
 };
