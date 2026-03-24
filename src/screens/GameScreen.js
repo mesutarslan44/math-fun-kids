@@ -6,6 +6,7 @@ import Layout from '../components/Layout';
 import Button from '../components/Button';
 import Mascot from '../components/Mascot';
 import Confetti from '../components/Confetti';
+import DraggableOption from '../components/DraggableOption';
 import SkeletonLoader, { SkeletonCard, SkeletonButton } from '../components/SkeletonLoader';
 import theme from '../constants/theme';
 import { generateQuestion } from '../utils/gameLogic';
@@ -13,8 +14,9 @@ import { playSuccess, playFailure, playSelection } from '../utils/SoundManager';
 import { saveLevelProgress } from '../utils/LevelManager';
 import { recordAnswer, recordSession, getStats } from '../utils/StatsManager';
 import { checkAndUnlockAchievements } from '../utils/AchievementManager';
+import { updateDailyGoalProgress } from '../utils/DailyGoalManager';
 import Logger from '../utils/Logger';
-import { Star, Lock, Home, RotateCcw } from 'lucide-react-native';
+import { Star, Lock, Home, RotateCcw, Flame } from 'lucide-react-native';
 
 const CHARACTERS = ['robot', 'cat', 'dino', 'fox', 'bunny', 'bear', 'lion', 'owl', 'panda', 'unicorn'];
 const UNLOCK_SCORES = {
@@ -46,6 +48,8 @@ const GameScreen = ({ navigation, route }) => {
     const [feedbackMessage, setFeedbackMessage] = useState('Harika! 🎉');
     const [newAchievement, setNewAchievement] = useState(null);
     const [showAchievementModal, setShowAchievementModal] = useState(false);
+    const [showStreakMessage, setShowStreakMessage] = useState(false);
+    const [streakMessage, setStreakMessage] = useState('');
     const achievementScale = useRef(new Animated.Value(0)).current;
     const achievementRotation = useRef(new Animated.Value(0)).current;
 
@@ -53,6 +57,8 @@ const GameScreen = ({ navigation, route }) => {
     const feedbackScale = useRef(new Animated.Value(0)).current;
     const feedbackOpacity = useRef(new Animated.Value(0)).current;
     const questionShake = useRef(new Animated.Value(0)).current;
+    const streakScale = useRef(new Animated.Value(0)).current;
+    const streakOpacity = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         loadProgress();
@@ -136,9 +142,10 @@ const GameScreen = ({ navigation, route }) => {
         // Record the answer for stats
         await recordAnswer(mode, isCorrect);
 
-        // Check for new achievements
+        // Check for new achievements (with current streak)
         const stats = await getStats();
-        const newAchievements = await checkAndUnlockAchievements(stats);
+        const statsWithStreak = { ...stats, currentStreak: isCorrect ? streak + 1 : 0 };
+        const newAchievements = await checkAndUnlockAchievements(statsWithStreak);
 
         // Show achievement animation if new achievement unlocked
         if (newAchievements && newAchievements.length > 0) {
@@ -174,26 +181,40 @@ const GameScreen = ({ navigation, route }) => {
 
         if (isCorrect) {
             // Correct!
+            const newStreak = streak + 1;
             setScore(s => s + 10);
-            setStreak(s => s + 1);
+            setStreak(newStreak);
             setCorrectCount(c => c + 1);
             setShowConfetti(true);
             playSuccess();
-            showFeedback(true);
+            
+            // Show streak celebration for special milestones
+            if (newStreak === 3 || newStreak === 5 || newStreak === 10 || newStreak === 20) {
+                showStreakCelebration(newStreak);
+            }
+            
+            showFeedback(true, newStreak);
             saveProgress(10); // Add to persistent total score
+            await updateDailyGoalProgress(1); // Update daily goal
             setQuestionsAnswered(q => q + 1);
             setTimeout(loadNewQuestion, 2000); // Longer wait to enjoy confetti
         } else {
             // Wrong!
+            if (streak > 0) {
+                // Show encouragement message when streak breaks
+                setFeedbackMessage(`Seri ${streak} doğruydu! Tekrar başla! 💪`);
+                showFeedback(false);
+            } else {
+                showFeedback(false);
+            }
             setStreak(0);
             playFailure();
-            showFeedback(false);
             shakeQuestion();
             setTimeout(() => {
                 setIsChecking(false);
                 setQuestionsAnswered(q => q + 1);
                 loadNewQuestion();
-            }, 1000);
+            }, 1500);
         }
     };
 
@@ -207,7 +228,19 @@ const GameScreen = ({ navigation, route }) => {
     };
 
     // Doğru cevap mesajları varyasyonu
-    const getSuccessMessage = () => {
+    const getSuccessMessage = (currentStreak = 0) => {
+        // Streak bazlı özel mesajlar
+        if (currentStreak >= 20) {
+            return 'EFSANE! 🚀🚀🚀';
+        } else if (currentStreak >= 10) {
+            return 'YILDIRIM HIZI! ⚡⚡';
+        } else if (currentStreak >= 5) {
+            return 'SERİ DEVAM! 🔥🔥';
+        } else if (currentStreak >= 3) {
+            return 'ATEŞ BAŞLADI! 🔥';
+        }
+        
+        // Normal mesajlar
         const messages = [
             'Harika! 🎉',
             'Mükemmel! ⭐',
@@ -217,13 +250,68 @@ const GameScreen = ({ navigation, route }) => {
             'Çok iyi! 🌟',
             'Muhteşem! 🎯',
             'Tebrikler! 🏆',
+            'Süper! ✨',
+            'Harika gidiyorsun! 🌈',
+            'Çok başarılı! 🎊',
+            'Müthiş! 💫',
         ];
         return messages[Math.floor(Math.random() * messages.length)];
     };
 
-    const showFeedback = (isCorrect) => {
+    const showStreakCelebration = (streakCount) => {
+        let message = '';
+        if (streakCount === 3) {
+            message = '3 DOĞRU ÜST ÜSTE! 🔥';
+        } else if (streakCount === 5) {
+            message = '5 DOĞRU ÜST ÜSTE! ⚡';
+        } else if (streakCount === 10) {
+            message = '10 DOĞRU ÜST ÜSTE! 🌩️';
+        } else if (streakCount === 20) {
+            message = '20 DOĞRU ÜST ÜSTE! 🚀';
+        }
+        
+        setStreakMessage(message);
+        setShowStreakMessage(true);
+        
+        // Animate streak message
+        streakScale.setValue(0);
+        streakOpacity.setValue(0);
+        Animated.parallel([
+            Animated.spring(streakScale, {
+                toValue: 1,
+                friction: 3,
+                tension: 40,
+                useNativeDriver: true,
+            }),
+            Animated.timing(streakOpacity, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start();
+        
+        // Hide after 2 seconds
+        setTimeout(() => {
+            Animated.parallel([
+                Animated.timing(streakScale, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(streakOpacity, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+            ]).start(() => {
+                setShowStreakMessage(false);
+            });
+        }, 2000);
+    };
+
+    const showFeedback = (isCorrect, currentStreak = 0) => {
         if (isCorrect) {
-            const message = getSuccessMessage();
+            const message = getSuccessMessage(currentStreak);
             setFeedbackMessage(message);
             Animated.parallel([
                 Animated.spring(feedbackScale, {
@@ -235,7 +323,58 @@ const GameScreen = ({ navigation, route }) => {
                     duration: 300,
                     useNativeDriver: true,
                 }),
-            ]).start();
+            ]).start(() => {
+                // Fade out after showing
+                setTimeout(() => {
+                    Animated.parallel([
+                        Animated.timing(feedbackScale, {
+                            toValue: 0,
+                            duration: 500,
+                            useNativeDriver: true,
+                        }),
+                        Animated.timing(feedbackOpacity, {
+                            toValue: 0,
+                            duration: 500,
+                            useNativeDriver: true,
+                        }),
+                    ]).start();
+                }, 1000);
+            });
+        } else {
+            // Wrong answer feedback
+            const wrongMessages = [
+                'Tekrar dene! 💪',
+                'Yaklaştın! 🎯',
+                'Bir daha dene! 🌟',
+                'Pes etme! 💫',
+            ];
+            setFeedbackMessage(wrongMessages[Math.floor(Math.random() * wrongMessages.length)]);
+            Animated.parallel([
+                Animated.spring(feedbackScale, {
+                    toValue: 1,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(feedbackOpacity, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+            ]).start(() => {
+                setTimeout(() => {
+                    Animated.parallel([
+                        Animated.timing(feedbackScale, {
+                            toValue: 0,
+                            duration: 500,
+                            useNativeDriver: true,
+                        }),
+                        Animated.timing(feedbackOpacity, {
+                            toValue: 0,
+                            duration: 500,
+                            useNativeDriver: true,
+                        }),
+                    ]).start();
+                }, 800);
+            });
         }
     };
 
@@ -310,14 +449,17 @@ const GameScreen = ({ navigation, route }) => {
 
                 {/* Progress / Streak */}
                 <View style={styles.streakContainer}>
-                    {[...Array(3)].map((_, i) => (
-                        <Star
-                            key={i}
-                            size={24}
-                            color={i < streak % 4 ? "#FFD700" : "rgba(255,255,255,0.5)"}
-                            fill={i < streak % 4 ? "#FFD700" : "transparent"}
-                        />
-                    ))}
+                    {streak > 0 && (
+                        <View style={styles.streakBadge}>
+                            <Flame size={20} color="#FF6B35" fill="#FF6B35" />
+                            <Text style={styles.streakText}>{streak}</Text>
+                        </View>
+                    )}
+                    {streak === 0 && (
+                        <View style={styles.streakBadge}>
+                            <Star size={20} color="rgba(255,255,255,0.5)" />
+                        </View>
+                    )}
                 </View>
 
                 <View style={styles.scoreContainer}>
@@ -379,18 +521,39 @@ const GameScreen = ({ navigation, route }) => {
                     <Text style={styles.feedbackText}>{feedbackMessage}</Text>
                 </Animated.View>
 
+                {/* Streak Celebration Overlay */}
+                {showStreakMessage && (
+                    <Animated.View 
+                        style={[
+                            styles.streakCelebrationContainer, 
+                            { 
+                                transform: [{ scale: streakScale }], 
+                                opacity: streakOpacity 
+                            }
+                        ]}
+                    >
+                        <Text style={styles.streakCelebrationText}>{streakMessage}</Text>
+                    </Animated.View>
+                )}
+
                 <View style={styles.optionsContainer}>
+                    <Text style={styles.dragHint}>
+                        👆 Seçeneği sürükleyip ortaya bırak veya dokun
+                    </Text>
                     {currentQuestion.options.map((option, index) => (
                         <View
                             key={`${currentQuestion.question}-${index}`}
                             style={styles.optionWrapper}
                         >
-                            <Button
-                                title={option.toString()}
-                                onPress={() => handleAnswer(option)}
-                                color={theme.colors.white}
-                                textColor={theme.colors.text}
-                                style={styles.optionButton}
+                            <DraggableOption
+                                option={option.toString()}
+                                index={index}
+                                onSelect={handleAnswer}
+                                isSelected={false}
+                                isCorrect={option === currentQuestion.answer}
+                                showAsCorrect={false}
+                                showAsWrong={false}
+                                disabled={isChecking}
                             />
                         </View>
                     ))}
@@ -459,7 +622,46 @@ const styles = StyleSheet.create({
     },
     streakContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
+    },
+    streakBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
         gap: 4,
+    },
+    streakText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+    },
+    streakCelebrationContainer: {
+        position: 'absolute',
+        top: '25%',
+        zIndex: 25,
+        backgroundColor: theme.colors.orange,
+        paddingVertical: theme.spacing.l,
+        paddingHorizontal: theme.spacing.xl,
+        borderRadius: theme.borderRadius.xl,
+        elevation: 15,
+        shadowColor: '#FF6B35',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        borderWidth: 3,
+        borderColor: theme.colors.white,
+    },
+    streakCelebrationText: {
+        color: theme.colors.white,
+        fontSize: 28,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        textShadowColor: 'rgba(0,0,0,0.3)',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
     },
     scoreContainer: {
         alignItems: 'center',
@@ -552,6 +754,14 @@ const styles = StyleSheet.create({
     optionButton: {
         width: '100%',
         paddingVertical: theme.spacing.l,
+    },
+    dragHint: {
+        width: '100%',
+        fontSize: 12,
+        color: theme.colors.textLight,
+        textAlign: 'center',
+        marginBottom: 8,
+        fontStyle: 'italic',
     },
     gameOverOverlay: {
         ...StyleSheet.absoluteFillObject,

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, ScrollView } from '
 import { Brain, Lightbulb, Home, RotateCcw, Star, ChevronRight } from 'lucide-react-native';
 import Layout from '../components/Layout';
 import Confetti from '../components/Confetti';
+import DraggableOption from '../components/DraggableOption';
 import theme from '../constants/theme';
 import { getBilsemLevelById } from '../data/bilsemQuestions';
 import { saveBilsemLevelProgress } from '../utils/BilsemManager';
@@ -20,6 +21,7 @@ const BilsemGameScreen = ({ navigation, route }) => {
     const [gameState, setGameState] = useState('playing'); // playing, finished
     const [showConfetti, setShowConfetti] = useState(false);
     const [finalResult, setFinalResult] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const shakeAnim = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -285,25 +287,18 @@ const BilsemGameScreen = ({ navigation, route }) => {
                         const showAsWrong = isAnswered && isSelected && !isCorrectAnswer;
 
                         return (
-                            <TouchableOpacity
+                            <DraggableOption
                                 key={index}
-                                style={[
-                                    styles.optionBtn,
-                                    showAsCorrect && styles.correctOption,
-                                    showAsWrong && styles.wrongOption,
-                                ]}
-                                onPress={() => handleAnswer(option)}
+                                option={option}
+                                index={index}
+                                onSelect={handleAnswer}
+                                isSelected={isSelected}
+                                isCorrect={isCorrectAnswer}
+                                showAsCorrect={showAsCorrect}
+                                showAsWrong={showAsWrong}
                                 disabled={isAnswered}
-                            >
-                                <Text style={[
-                                    styles.optionText,
-                                    (showAsCorrect || showAsWrong) && styles.optionTextSelected,
-                                ]}>
-                                    {option}
-                                </Text>
-                                {showAsCorrect && <Text style={styles.correctMark}>✓</Text>}
-                                {showAsWrong && <Text style={styles.wrongMark}>✗</Text>}
-                            </TouchableOpacity>
+                                onDragStateChange={setIsDragging}
+                            />
                         );
                     })}
                 </View>
@@ -436,6 +431,14 @@ const styles = StyleSheet.create({
     },
     optionsContainer: {
         gap: 12,
+        marginTop: 10,
+    },
+    dragHint: {
+        fontSize: 14,
+        color: theme.colors.textLight,
+        textAlign: 'center',
+        marginBottom: 8,
+        fontStyle: 'italic',
     },
     optionBtn: {
         backgroundColor: 'rgba(255,255,255,0.95)',

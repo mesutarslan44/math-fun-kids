@@ -15,6 +15,8 @@ const CATEGORY_LABELS = {
     symmetry: '🪞 Simetri',
     cipher: '🔐 Şifre',
     shadow: '👤 Gölge',
+    streak: '🔥 Seri',
+    goals: '🎯 Hedefler',
     special: '🌟 Özel',
 };
 

@@ -205,6 +205,122 @@ export const ACHIEVEMENT_LIST = [
         condition: (s) => s.shadowLevels?.includes(10)
     },
 
+    // ==================== STREAK BAŞARIMLARI ====================
+    {
+        id: 'streak_3',
+        title: 'Ateş Başladı! 🔥',
+        description: '3 doğru üst üste',
+        icon: '🔥',
+        category: 'streak',
+        condition: (s) => s.currentStreak >= 3
+    },
+    {
+        id: 'streak_5',
+        title: 'Seri Devam! ⚡',
+        description: '5 doğru üst üste',
+        icon: '⚡',
+        category: 'streak',
+        condition: (s) => s.currentStreak >= 5
+    },
+    {
+        id: 'streak_10',
+        title: 'Yıldırım Hızı! 🌩️',
+        description: '10 doğru üst üste',
+        icon: '🌩️',
+        category: 'streak',
+        condition: (s) => s.currentStreak >= 10
+    },
+    {
+        id: 'streak_20',
+        title: 'Efsane Seri! 🚀',
+        description: '20 doğru üst üste',
+        icon: '🚀',
+        category: 'streak',
+        condition: (s) => s.currentStreak >= 20
+    },
+    {
+        id: 'daily_streak_3',
+        title: '3 Gün Üst Üste! 📅',
+        description: '3 gün üst üste oyna',
+        icon: '📅',
+        category: 'streak',
+        condition: (s) => s.streakDays >= 3
+    },
+    {
+        id: 'daily_streak_7',
+        title: 'Haftalık Şampiyon! 🏆',
+        description: '7 gün üst üste oyna',
+        icon: '🏆',
+        category: 'streak',
+        condition: (s) => s.streakDays >= 7
+    },
+    {
+        id: 'daily_streak_14',
+        title: 'İki Hafta! 💪',
+        description: '14 gün üst üste oyna',
+        icon: '💪',
+        category: 'streak',
+        condition: (s) => s.streakDays >= 14
+    },
+    {
+        id: 'daily_streak_30',
+        title: 'Aylık Efsane! 👑',
+        description: '30 gün üst üste oyna',
+        icon: '👑',
+        category: 'streak',
+        condition: (s) => s.streakDays >= 30
+    },
+
+    // ==================== GÜNLÜK HEDEF BAŞARIMLARI ====================
+    {
+        id: 'daily_goal_1',
+        title: 'İlk Hedef! 🎯',
+        description: 'İlk günlük hedefini tamamla',
+        icon: '🎯',
+        category: 'goals',
+        condition: (s) => s.dailyGoalsCompleted >= 1
+    },
+    {
+        id: 'daily_goal_7',
+        title: 'Haftalık Hedefçi! 📊',
+        description: '7 günlük hedef tamamla',
+        icon: '📊',
+        category: 'goals',
+        condition: (s) => s.dailyGoalsCompleted >= 7
+    },
+    {
+        id: 'daily_goal_30',
+        title: 'Hedef Ustası! 🎖️',
+        description: '30 günlük hedef tamamla',
+        icon: '🎖️',
+        category: 'goals',
+        condition: (s) => s.dailyGoalsCompleted >= 30
+    },
+    {
+        id: 'speed_demon',
+        title: 'Hızlı Çözücü! ⚡',
+        description: '10 soruyu 2 dakikada çöz',
+        icon: '⚡',
+        category: 'special',
+        condition: (s) => s.fastAnswers >= 10
+    },
+    {
+        id: 'perfect_10',
+        title: 'Mükemmel 10! 💯',
+        description: 'Bir seviyede 10/10 doğru',
+        icon: '💯',
+        category: 'special',
+        condition: (s) => s.perfectLevels >= 1
+    },
+    {
+        id: 'first_100',
+        title: 'İlk 100 Soru! 🎯',
+        description: '100 soru çöz',
+        icon: '🎯',
+        category: 'general',
+        condition: (s) => s.totalQuestionsAnswered >= 100
+    },
+
     // ==================== ÖZEL BAŞARIMLAR ====================
     {
         id: 'all_categories',

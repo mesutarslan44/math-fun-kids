@@ -1,0 +1,17 @@
+# Gradle Properties Örneği
+# Bu dosyayı kopyalayıp `android/gradle.properties` olarak kaydedin
+# (android klasörü prebuild sonrası oluşacak)
+
+# Keystore Bilgileri (Güvenlik için environment variables kullanın)
+# Bu dosyayı git'e eklemeyin! .gitignore'a ekleyin.
+
+# Keystore yolu (android/app/ klasöründen göreceli)
+MYAPP_RELEASE_STORE_FILE=../math-fun-kids.keystore
+MYAPP_RELEASE_KEY_ALIAS=math-fun-kids
+MYAPP_RELEASE_STORE_PASSWORD=MathFun2024!
+MYAPP_RELEASE_KEY_PASSWORD=MathFun2024!
+
+# Android Build Ayarları
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.enableJetifier=true

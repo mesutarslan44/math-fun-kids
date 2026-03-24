@@ -12,6 +12,10 @@ const defaultStats = {
     lastPlayedDate: null,
     streakDays: 0,
     bestStreak: 0,
+    currentStreak: 0,
+    dailyGoalsCompleted: 0,
+    fastAnswers: 0,
+    perfectLevels: 0,
     modeStats: {
         addition: { played: 0, correct: 0 },
         subtraction: { played: 0, correct: 0 },

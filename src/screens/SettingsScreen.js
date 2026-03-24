@@ -3,21 +3,35 @@ import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView } from 're
 import Layout from '../components/Layout';
 import theme from '../constants/theme';
 import { getAudioSettings, setMusicEnabled, setSoundEnabled, playSelection } from '../utils/SoundManager';
+import { getDailyGoalProgress, setDailyGoal } from '../utils/DailyGoalManager';
 import { getAppVersion } from '../utils/AppVersion';
-import { Music, Volume2, Info, BarChart2 } from 'lucide-react-native';
+import { Music, Volume2, Info, BarChart2, Target } from 'lucide-react-native';
 
 const SettingsScreen = ({ navigation }) => {
     const [music, setMusic] = useState(true);
     const [sound, setSound] = useState(true);
+    const [dailyGoal, setDailyGoalState] = useState(null);
 
     useEffect(() => {
         loadSettings();
+        loadDailyGoal();
     }, []);
 
     const loadSettings = async () => {
         const settings = getAudioSettings();
         setMusic(settings.music);
         setSound(settings.sound);
+    };
+
+    const loadDailyGoal = async () => {
+        const goal = await getDailyGoalProgress();
+        setDailyGoalState(goal);
+    };
+
+    const handleSetGoal = async (target) => {
+        playSelection();
+        await setDailyGoal(target);
+        await loadDailyGoal();
     };
 
     const toggleMusic = (value) => {
@@ -67,6 +81,43 @@ const SettingsScreen = ({ navigation }) => {
                             onValueChange={toggleSound}
                             value={sound}
                         />
+                    </View>
+                </View>
+
+                {/* Daily Goal Section */}
+                <View style={styles.section}>
+                    <View style={styles.goalHeader}>
+                        <View style={styles.iconLabel}>
+                            <Target color={theme.colors.primary} size={24} />
+                            <Text style={styles.label}>Günlük Hedef</Text>
+                        </View>
+                        {dailyGoal && (
+                            <Text style={styles.goalCurrent}>
+                                {dailyGoal.current} / {dailyGoal.target}
+                            </Text>
+                        )}
+                    </View>
+                    <Text style={styles.goalDescription}>
+                        Her gün çözmek istediğin soru sayısını belirle
+                    </Text>
+                    <View style={styles.goalButtons}>
+                        {[10, 20, 30, 50].map((target) => (
+                            <TouchableOpacity
+                                key={target}
+                                style={[
+                                    styles.goalButton,
+                                    dailyGoal?.target === target && styles.goalButtonActive
+                                ]}
+                                onPress={() => handleSetGoal(target)}
+                            >
+                                <Text style={[
+                                    styles.goalButtonText,
+                                    dailyGoal?.target === target && styles.goalButtonTextActive
+                                ]}>
+                                    {target}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
                 </View>
 
@@ -195,6 +246,49 @@ const styles = StyleSheet.create({
         color: theme.colors.white,
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    goalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    goalCurrent: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+    },
+    goalDescription: {
+        fontSize: 14,
+        color: theme.colors.textLight,
+        marginBottom: 15,
+    },
+    goalButtons: {
+        flexDirection: 'row',
+        gap: 10,
+        flexWrap: 'wrap',
+    },
+    goalButton: {
+        flex: 1,
+        minWidth: '22%',
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: theme.colors.textLight,
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.02)',
+    },
+    goalButtonActive: {
+        borderColor: theme.colors.success,
+        backgroundColor: theme.colors.success,
+    },
+    goalButtonText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+    },
+    goalButtonTextActive: {
+        color: theme.colors.white,
     },
 });
 

@@ -8,8 +8,13 @@ import Mascot from '../components/Mascot';
 import Confetti from '../components/Confetti';
 import theme from '../constants/theme';
 import { checkDailyReward, claimDailyReward } from '../utils/DailyRewardManager';
+import { getDailyGoalProgress, checkDailyGoalCompleted, markDailyGoalCelebrated } from '../utils/DailyGoalManager';
+import { getStats } from '../utils/StatsManager';
+import { checkAndUnlockAchievements } from '../utils/AchievementManager';
 import { playSuccess, playSelection } from '../utils/SoundManager';
 import Logger from '../utils/Logger';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 const CHARACTERS = ['robot', 'cat', 'dino', 'fox', 'bunny', 'bear', 'lion', 'owl', 'panda', 'unicorn'];
 const CHARACTER_NAMES = {
@@ -61,10 +66,15 @@ const HomeScreen = ({ navigation }) => {
     const [selectedMode, setSelectedMode] = useState(null);
     const [character, setCharacter] = useState('robot');
     const [unlockedCharacters, setUnlockedCharacters] = useState(['robot']);
+    const [dailyGoal, setDailyGoal] = useState(null);
+    const [stats, setStats] = useState(null);
+    const [showGoalCompleted, setShowGoalCompleted] = useState(false);
 
     useEffect(() => {
         loadCharacterAndProgress();
         checkReward();
+        loadDailyGoal();
+        loadStats();
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -78,6 +88,33 @@ const HomeScreen = ({ navigation }) => {
             }),
         ]).start();
     }, []);
+
+    // Reload data when screen is focused
+    useFocusEffect(
+        useCallback(() => {
+            loadDailyGoal();
+            loadStats();
+        }, [])
+    );
+
+    useEffect(() => {
+        // Check if daily goal was completed
+        const checkGoal = async () => {
+            const completed = await checkDailyGoalCompleted();
+            if (completed) {
+                setShowGoalCompleted(true);
+                playSuccess();
+                await markDailyGoalCelebrated();
+                
+                // Check for achievements
+                const stats = await getStats();
+                await checkAndUnlockAchievements(stats);
+            }
+        };
+        if (dailyGoal) {
+            checkGoal();
+        }
+    }, [dailyGoal]);
 
     const loadCharacterAndProgress = async () => {
         try {
@@ -102,6 +139,16 @@ const HomeScreen = ({ navigation }) => {
             setReward(result);
             setTimeout(() => setShowRewardModal(true), 1000);
         }
+    };
+
+    const loadDailyGoal = async () => {
+        const goal = await getDailyGoalProgress();
+        setDailyGoal(goal);
+    };
+
+    const loadStats = async () => {
+        const statsData = await getStats();
+        setStats(statsData);
     };
 
     const handleClaimReward = async () => {
@@ -151,6 +198,34 @@ const HomeScreen = ({ navigation }) => {
                         <Button
                             title="Topla"
                             onPress={handleClaimReward}
+                            color={theme.colors.success}
+                            textColor={theme.colors.white}
+                            style={{ width: '100%', marginTop: 20 }}
+                        />
+                    </View>
+                </View>
+            )}
+
+            {/* Daily Goal Completed Modal */}
+            {showGoalCompleted && (
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.goalIcon}>🎯</Text>
+                        <Text style={styles.modalTitle}>Günlük Hedef Tamamlandı! 🎉</Text>
+                        <Text style={styles.modalText}>
+                            Harika iş! Bugün {dailyGoal?.target} soru hedefine ulaştın!
+                        </Text>
+                        <Text style={styles.rewardAmount}>+100 Bonus Puan</Text>
+                        <Button
+                            title="Harika!"
+                            onPress={() => {
+                                setShowGoalCompleted(false);
+                                // Add bonus points
+                                AsyncStorage.getItem('totalScore').then(savedScore => {
+                                    const newTotal = (savedScore ? parseInt(savedScore) : 0) + 100;
+                                    AsyncStorage.setItem('totalScore', newTotal.toString());
+                                });
+                            }}
                             color={theme.colors.success}
                             textColor={theme.colors.white}
                             style={{ width: '100%', marginTop: 20 }}
@@ -241,6 +316,33 @@ const HomeScreen = ({ navigation }) => {
                         Bilsem ve Eğlenceli Matematik
                     </Animated.Text>
                 </View>
+
+                {/* Daily Goal Progress Card */}
+                {dailyGoal && (
+                    <View style={styles.goalCard}>
+                        <View style={styles.goalHeader}>
+                            <Text style={styles.goalTitle}>🎯 Günlük Hedef</Text>
+                            <Text style={styles.goalProgressText}>
+                                {dailyGoal.current} / {dailyGoal.target}
+                            </Text>
+                        </View>
+                        <View style={styles.goalProgressBar}>
+                            <View 
+                                style={[
+                                    styles.goalProgressFill, 
+                                    { width: `${Math.min(dailyGoal.percentage, 100)}%` }
+                                ]}
+                            />
+                        </View>
+                        {stats && stats.streakDays > 0 && (
+                            <View style={styles.streakInfo}>
+                                <Text style={styles.streakText}>
+                                    🔥 {stats.streakDays} gün üst üste oynuyorsun!
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                )}
 
                 {/* Featured Modes */}
                 <View style={styles.featuredSection}>
@@ -724,6 +826,61 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: theme.colors.white,
         overflow: 'hidden',
+    },
+    goalCard: {
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderRadius: 20,
+        padding: 16,
+        marginBottom: 15,
+        marginHorizontal: 5,
+        elevation: 3,
+        borderWidth: 2,
+        borderColor: theme.colors.secondary,
+    },
+    goalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    goalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+    },
+    goalProgressText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.primary,
+    },
+    goalProgressBar: {
+        height: 12,
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        borderRadius: 6,
+        overflow: 'hidden',
+        marginBottom: 8,
+    },
+    goalProgressFill: {
+        height: '100%',
+        backgroundColor: theme.colors.success,
+        borderRadius: 6,
+    },
+    streakInfo: {
+        marginTop: 8,
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(0,0,0,0.1)',
+    },
+    streakText: {
+        fontSize: 14,
+        color: theme.colors.orange,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    goalIcon: {
+        fontSize: 64,
+        textAlign: 'center',
+        marginBottom: 10,
     },
 });
 
