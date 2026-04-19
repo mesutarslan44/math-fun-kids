@@ -1,12 +1,20 @@
 {
   "name": "math-fun-kids",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "content:export:bilsem": "node scripts/export-bilsem-pack.js",
+    "content:validate:bilsem": "node scripts/validate-bilsem-pack.js",
+    "content:prepare:bilsem": "npm run content:export:bilsem && npm run content:validate:bilsem",
+    "content:analyze:bilsem": "node scripts/analyze-bilsem-pack.js",
+    "content:generate:supplement": "node scripts/generate-bilsem-supplement-pack.js",
+    "validate:bilsem": "node scripts/validate-bilsem-pack.js",
+    "regen:supplement": "node scripts/generate-bilsem-supplement-pack.js",
+    "content:check": "npm run regen:supplement && npm run validate:bilsem"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
